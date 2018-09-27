@@ -1,12 +1,11 @@
 var ensure = require('../ensure');
 var hash = require('../hash');
 
-module.exports = function(blogID, name) {
+module.exports = function(name) {
 
-  ensure(blogID, 'string')
-    .and(name, 'string');
+  ensure(name, 'string');
 
-  var prefix = 'blog:' + blogID + ':store:' + name;
+  var prefix = 'transformer:' + name;
 
   return {
 
@@ -16,6 +15,12 @@ module.exports = function(blogID, name) {
     content: function (contentHash) {
       ensure(contentHash, 'string');
       return prefix + ':content:' + contentHash;
+    },
+
+    // store the result against a content hash
+    type: function (contentHash) {
+      ensure(contentHash, 'string');
+      return prefix + ':type:' + contentHash;
     },
 
     url: {

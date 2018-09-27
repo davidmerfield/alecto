@@ -5,6 +5,7 @@ var HashFile = require('./hash');
 var download = require('./download');
 var ensure = require('../ensure');
 var rm = require('../remove');
+
 var localPath = require('../localPath');
 var config = require('config');
 var join = require('path').join;
@@ -27,14 +28,14 @@ var join = require('path').join;
 // TODO:
 // Fix bug with transformer to handle ESOCKETIMEDOUT error...
 
-function Transformer (blogID, name) {
+function Transformer (name, transform) {
 
-  ensure(blogID, 'string')
+  ensure(transform, 'function')
     .and(name, 'string');
 
-  var keys = Keys(blogID, name);
+  var keys = Keys(name);
 
-  function lookup (src, transform, callback) {
+  function lookup (src, callback) {
 
     ensure(src, 'string')
       .and(transform, 'function')
@@ -44,6 +45,7 @@ function Transformer (blogID, name) {
 
     try {
       url = isURL(src);
+
 
       if (src.indexOf('/_image_cache/') === 0) {
         path = join(config.blog_static_files_dir, blogID, src);
@@ -179,17 +181,20 @@ function Transformer (blogID, name) {
 
   function get (hash, callback) {
 
-    client.get(keys.content(hash), function(err, stringifiedResult){
+    client.mget([keys.content(hash), keys.type(hash)], function(err, res){
 
       if (err) throw err;
 
-      var res = null;
+      var result = res[0];
+      var type = res[1];
 
-      try {
-        res = JSON.parse(stringifiedResult);
-      } catch (e) {}
+      if (type === 'object') {
+        result = JSON.parse(result);
+      } else {
+        //
+      }
 
-      return callback(null, res);
+      return callback(null, result);
     });
   }
 
@@ -222,16 +227,27 @@ function Transformer (blogID, name) {
     callback = callback || nothing;
 
     ensure(hash,'string')
-      .and(result,'object')
       .and(callback,'function');
 
-    var stringifiedResult = JSON.stringify(result);
+    var type = typeof result;
     var contentKey = keys.content(hash);
+    var typeKey = keys.type(hash);
+
+    if (type === 'object') {
+      result = JSON.stringify(result);
+    } else if (type === 'string') {
+      // 
+    } else {
+      return callback(new Error('Please pass a string or object as result'));
+    }
+
 
     client
       .multi()
       .sadd(keys.everything, contentKey)
-      .set(contentKey, stringifiedResult)
+      .sadd(keys.everything, typeKey)
+      .set(contentKey, result)
+      .set(typeKey, type)
       .exec(callback);
   }
 
@@ -243,10 +259,9 @@ function Transformer (blogID, name) {
     });
   }
 
-  return {
-    lookup: lookup,
-    flush: flush
-  };
+  lookup.flush = flush;
+
+  return lookup;
 }
 
 function nothing (err){

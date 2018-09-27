@@ -17,6 +17,9 @@ module.exports = function (path, callback) {
   var fd = fs.createReadStream(path);
       fd.pipe(hash);
 
+  // we also want to copy the file to a tmp
+  // Location so maybe merge the streams?
+
   fd.on('error', callback);
 
   fd.on('end', function() {
