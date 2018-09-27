@@ -1,4 +1,4 @@
-![Fragmentary marble sarcophagus with scenes from the Oresteia](
+![Fragmentary marble sarcophagus with scenes from the Oresteia](sarcophagus.jpg)
 
 Alecto
 ------
