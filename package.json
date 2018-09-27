@@ -1,0 +1,22 @@
+{
+  "name": "alecto",
+  "version": "0.0.0",
+  "description": "...",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidmerfield/alecto.git"
+  },
+  "author": "",
+  "license": "CC0-1.0",
+  "bugs": {
+    "url": "https://github.com/davidmerfield/alecto/issues"
+  },
+  "homepage": "https://github.com/davidmerfield/alecto#readme"
+}
